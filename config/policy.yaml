@@ -1,0 +1,25 @@
+# Review policy: who may approve a proposed change, and when.
+#
+# The point of this file is that "review" is a gate with rules, not a shrug.
+# A reviewer approves an item only if the policy says the queue is theirs to
+# approve and the item stays inside the configured limits. Everything else is
+# escalated, and an escalated item can never reach a release.
+
+version: "1.0.0"
+
+reviewers:
+  agent:
+    may_approve_queues: [knowledge, prompt]
+    max_count_per_item: 50        # an item affecting more than this many runs
+    max_cost_queues: [low]        # queues this reviewer is allowed to clear
+  human:
+    may_approve_queues: [knowledge, prompt, model]
+    max_count_per_item: 10000
+    max_cost_queues: [low, high]
+
+# Items whose signal count is below this are noise, not signal.
+min_count_to_review: 1
+
+# A change that touches the model queue, or that affects more runs than the
+# reviewing agent may clear, must be escalated to a human.
+escalate_queues: [model]

@@ -1,0 +1,9 @@
+# The queue item schema. Every item that enters a queue must validate
+# against this, or the enqueue is refused — a malformed item that reaches a
+# review is a change nobody can reason about.
+version: "1.0.0"
+
+required: [id, trajectory_id, queue, signals, count, cost, status, proposed_by]
+statuses: [pending, approved, rejected, escalated, applied]
+costs: [low, high]
+queues: [knowledge, prompt, model]

@@ -1,0 +1,59 @@
+# Labelled regression suite.
+#
+# Every case says which queue a trajectory must be routed to. The suite is run
+# against the baseline taxonomy and against the candidate produced by a change
+# set; a candidate is only accepted when it breaks nothing that used to pass
+# and actually fixes at least one case.
+#
+# Case c04 is the one the demo's change set fixes: `stale_policy` is filed
+# under the prompt queue in the baseline, so it routes to prompt, while the
+# correct queue is knowledge.
+
+cases:
+  - id: c01
+    trajectory:
+      id: r-01
+      signals: [no_faq_entry]
+    expected_queue: knowledge
+
+  - id: c02
+    trajectory:
+      id: r-02
+      signals: [prompt_drift, wrong_tone]
+    expected_queue: prompt
+
+  - id: c03
+    trajectory:
+      id: r-03
+      signals: [timeout, wrong_output_format]
+    expected_queue: model
+
+  - id: c04
+    trajectory:
+      id: r-04
+      signals: [stale_policy]
+    expected_queue: knowledge
+
+  - id: c05
+    trajectory:
+      id: r-05
+      signals: [missing_answer, no_faq_entry]
+    expected_queue: knowledge
+
+  - id: c06
+    trajectory:
+      id: r-06
+      signals: [capability_gap]
+    expected_queue: model
+
+  - id: c07
+    trajectory:
+      id: r-07
+      signals: [unknown_product]
+    expected_queue: knowledge
+
+  - id: c08
+    trajectory:
+      id: r-08
+      signals: [refused_valid_request]
+    expected_queue: prompt

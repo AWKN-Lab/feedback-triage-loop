@@ -1,0 +1,21 @@
+version: 1.1.0
+reviewers:
+  agent:
+    may_approve_queues:
+    - knowledge
+    - prompt
+    max_count_per_item: 50
+    max_cost_queues:
+    - low
+  human:
+    may_approve_queues:
+    - knowledge
+    - prompt
+    - model
+    max_count_per_item: 10000
+    max_cost_queues:
+    - low
+    - high
+min_count_to_review: 1
+escalate_queues:
+- model

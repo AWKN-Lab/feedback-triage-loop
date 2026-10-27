@@ -1,0 +1,103 @@
+── environment ──
+python: Python 3.11.2
+pyyaml: 6.0.3
+date:   2026-10-27T05:03:27Z
+
+── 1. ENQUEUE — 反馈入队 ──
+$ /workspace/.venv-clawhunt/bin/python triage/cli.py ingest --trajectories examples/trajectories.json --state /workspace/work/bid-1535/feedback-triage/evidence/state.json
+ingested 8 trajectories -> 8 queue item(s)
+  knowledge    4
+  model        2
+  prompt       2
+  state: /workspace/work/bid-1535/feedback-triage/evidence/state.json
+[exit 0]
+
+── 2. REVIEW — 审核 ──
+$ /workspace/.venv-clawhunt/bin/python triage/cli.py review --state /workspace/work/bid-1535/feedback-triage/evidence/state.json --policy config/policy.yaml
+  qi-0001  approved   by agent    queue 'knowledge' is within the agent reviewer's limits
+  qi-0002  escalated  by policy   the routing was ambiguous; a human must decide which queue it belongs to
+  qi-0003  approved   by agent    queue 'prompt' is within the agent reviewer's limits
+  qi-0004  approved   by agent    queue 'prompt' is within the agent reviewer's limits
+  qi-0005  escalated  by policy   queue 'model' must be approved by a human
+  qi-0006  escalated  by policy   queue 'model' must be approved by a human
+  qi-0007  escalated  by policy   the routing was ambiguous; a human must decide which queue it belongs to
+  qi-0008  approved   by agent    queue 'knowledge' is within the agent reviewer's limits
+  -> {'approved': 4, 'escalated': 4}
+[exit 0]
+
+── 3. VERSION CHANGE — 版本变更 ──
+$ /workspace/.venv-clawhunt/bin/python triage/cli.py change --state /workspace/work/bid-1535/feedback-triage/evidence/state.json --taxonomy config/taxonomy.yaml --policy config/policy.yaml
+change set 1.0.0 -> 1.1.0
+  qi-0001  knowledge    route 'stale_policy, missing_answer, no_faq_entry' to the knowledge queue
+  qi-0003  prompt       route 'wrong_tone, prompt_drift' to the prompt queue
+  qi-0004  prompt       route 'refused_valid_request, prompt_drift' to the prompt queue
+  qi-0008  knowledge    route 'no_faq_entry' to the knowledge queue
+  moved 'stale_policy' from prompt to knowledge
+  candidate config: /workspace/work/bid-1535/feedback-triage/evidence/candidate
+[exit 0]
+
+── 4. REGRESSION — 回归闭环 ──
+$ /workspace/.venv-clawhunt/bin/python triage/cli.py regress --state /workspace/work/bid-1535/feedback-triage/evidence/state.json --suite examples/regression-suite.yaml --taxonomy config/taxonomy.yaml --policy config/policy.yaml
+regression suite: 8 case(s)
+  baseline  : 7/8 passed
+  candidate : 8/8 passed
+  fixed     : ['c04']
+  regressions: []
+  [OK] change 1.1.0 applied: taxonomy.v1.1.0.yaml, policy.v1.1.0.yaml
+[exit 0]
+
+── the versioned configuration that was produced ──
+$ cat config/taxonomy.v1.1.0.yaml
+version: 1.1.0
+default_queue: knowledge
+queues:
+  knowledge:
+    description: 'The answer exists but the bot could not reach it: the knowledge
+      base has no entry, the policy text is stale, or the FAQ simply does not cover
+      the case. Fix by writing or updating knowledge.
+
+      '
+    signals:
+    - no_faq_entry
+    - missing_answer
+    - unknown_product
+    - stale_policy
+    cost: low
+    review: auto
+  prompt:
+    description: 'The knowledge was there and reachable, but the bot did not use it:
+      the instructions drifted, the tone was wrong, or a valid request was refused.
+      Fix by changing the prompt or the routing rules.
+
+      '
+    signals:
+    - prompt_drift
+    - wrong_tone
+    - refused_valid_request
+    - wrong_intent_picked
+    cost: low
+    review: auto
+  model:
+    description: 'The bot had the knowledge and the instructions and still could not
+      do the job: timeouts, malformed output, or a capability the model does not have.
+      Fix by changing the model, the adapter or the surrounding system.
+
+      '
+    signals:
+    - timeout
+    - wrong_output_format
+    - capability_gap
+    - hallucinated_value
+    cost: high
+    review: human
+[exit 0]
+
+── final state ──
+$ /workspace/.venv-clawhunt/bin/python triage/cli.py status --state /workspace/work/bid-1535/feedback-triage/evidence/state.json
+  queue items : 8
+  by status   : {'approved': 4, 'escalated': 4}
+  change set  : 1.0.0 -> 1.1.0 (applied=True)
+  regression  : baseline 7/8, candidate 8/8
+[exit 0]
+
+log: /workspace/work/bid-1535/feedback-triage/evidence/run.log

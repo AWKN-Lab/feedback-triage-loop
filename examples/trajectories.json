@@ -1,0 +1,67 @@
+[
+  {
+    "id": "t-0001",
+    "task": "Customer asked whether their return window is still open; the bot answered with a policy withdrawn last quarter.",
+    "intent": "returns_policy",
+    "outcome": "failed",
+    "signals": ["stale_policy", "missing_answer", "no_faq_entry"],
+    "count": 14,
+    "note": "same failure on 14 runs"
+  },
+  {
+    "id": "t-0002",
+    "task": "Customer asked about a product the catalogue does not carry; the bot guessed a price.",
+    "intent": "catalogue_price",
+    "outcome": "failed",
+    "signals": ["unknown_product", "hallucinated_value"],
+    "count": 6
+  },
+  {
+    "id": "t-0003",
+    "task": "Customer asked for a refund; the bot answered in a tone the team had explicitly banned.",
+    "intent": "refund_request",
+    "outcome": "failed",
+    "signals": ["wrong_tone", "prompt_drift"],
+    "count": 9
+  },
+  {
+    "id": "t-0004",
+    "task": "Customer asked to cancel an order; the bot refused although cancellation is allowed within the window.",
+    "intent": "cancel_order",
+    "outcome": "failed",
+    "signals": ["refused_valid_request", "prompt_drift"],
+    "count": 11
+  },
+  {
+    "id": "t-0005",
+    "task": "The order-tracking tool was unavailable; the bot produced a truncated status block.",
+    "intent": "order_status",
+    "outcome": "failed",
+    "signals": ["timeout", "wrong_output_format"],
+    "count": 4
+  },
+  {
+    "id": "t-0006",
+    "task": "Customer asked for a spreadsheet export; the model has no capability for it.",
+    "intent": "export_request",
+    "outcome": "failed",
+    "signals": ["capability_gap"],
+    "count": 3
+  },
+  {
+    "id": "t-0007",
+    "task": "The bot picked the wrong intent for a warranty question and answered about shipping.",
+    "intent": "warranty",
+    "outcome": "failed",
+    "signals": ["wrong_intent_picked", "no_faq_entry"],
+    "count": 5
+  },
+  {
+    "id": "t-0008",
+    "task": "Customer asked how to change the delivery address; no instruction covered it.",
+    "intent": "change_address",
+    "outcome": "failed",
+    "signals": ["no_faq_entry"],
+    "count": 21
+  }
+]
